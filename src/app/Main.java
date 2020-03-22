@@ -1,10 +1,11 @@
 package app;
 
 import app.cmdLine.CmdLine;
+import app.cmdLine.Helper;
 import app.cmdLine.exceptions.ParametersException;
 import app.matrix.Matrix;
 import app.people.Cluster;
-import app.people.People;
+import app.reporter.Reporter;
 import org.apache.commons.cli.ParseException;
 
 public class Main {
@@ -13,25 +14,24 @@ public class Main {
         InputParameters inputParameters = null;
         try {
             inputParameters = cmdLine.parse(args);
-        }
-        catch (ParseException | ParametersException e) {
+        } catch (ParseException | ParametersException e) {
             System.out.println(e.getMessage());
-            System.out.println(cmdLine.getHelp());
+            System.out.println(Helper.getHelp());
             System.exit(1);
-        }
-        catch (Exception e) {
-            System.out.println(cmdLine.getHelp());
+        } catch (Exception e) {
+            System.out.println(Helper.getHelp());
             System.exit(1);
         }
 
-        Matrix matrix = new Matrix(inputParameters.getRowCountM(), inputParameters.getColumnCountN(), inputParameters.getFillFactor());
-        matrix.printMatrix();
+        Matrix matrix = new Matrix(inputParameters);
+        String reporter = Reporter.printMatrix(matrix);
 
-        People people = new People(matrix.getPeopleCount());
-        people.determiningPositionPeople(inputParameters.getRowCountM(), inputParameters.getColumnCountN(), matrix.getField());
+        matrix.deleteFreeFields();
 
         Cluster clusters = new Cluster();
-        clusters.clusterDetection(matrix.getPeopleCount(), people.getPeopleIndices());
-        clusters.printCluster();
+        clusters.clusterDetection(matrix.getFields());
+
+        reporter += Reporter.makeReport(clusters);
+        System.out.println(reporter);
     }
 }

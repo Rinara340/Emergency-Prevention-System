@@ -1,59 +1,81 @@
 package app.people;
 
+import app.matrix.Field;
+
+import java.util.ArrayList;
+
 public class Cluster {
-    private int none = 0, minor = 0, normal = 0, major = 0, critical = 0;
+    private int none = 0;
+    private int minor = 0;
+    private int normal = 0;
+    private int major = 0;
+    private int critical = 0;
 
-    public void clusterDetection(int peopleCount, int[][] peopleIndex) {
-        for (int i = 0; i < peopleCount; i++){
-            if (i > 0 && peopleIndex[0][i] == -1 && peopleIndex[1][i] == -1){
+    public void clusterDetection(ArrayList<Field> fields) {
+        final int MAXIMUM_NONE = 2;
+        final int MAXIMUM_MINOR = 4;
+        final int MAXIMUM_NORMAL = 7;
+        final int MAXIMUM_MAJOR = 13;
+
+        for (Field field : fields) {
+            if (field.isChecked()) {
                 continue;
             }
-            else {
-                int cluster;
-                if (i == peopleCount - 1)
-                    cluster = 1;
-                else
-                    cluster = clusterCalculation(peopleIndex, i);
 
-                if (cluster > 13)
-                    critical++;
-                else if (cluster > 7)
-                    major++;
-                else if (cluster > 4)
-                    normal++;
-                else if (cluster > 2)
-                    minor++;
-                else none++;
+            int clusterSize = clusterCalculation(field, fields);
+
+            if (clusterSize > MAXIMUM_MAJOR) {
+                critical++;
+            } else if (clusterSize > MAXIMUM_NORMAL) {
+                major++;
+            } else if (clusterSize > MAXIMUM_MINOR) {
+                normal++;
+            } else if (clusterSize > MAXIMUM_NONE) {
+                minor++;
+            } else {
+                none++;
             }
         }
     }
 
-    private int clusterCalculation(int[][] people, int i){//Проходится по всем Х в скоплении
-        int cluster = 1;
-        int peopleFirst = people[0][i];
-        int peopleSecond = people[1][i];
-        people[0][i] = -1;
-        people[1][i] = -1;
-        for (int j = 1; j < people[0].length; j++){
-            if (people[0][j] == -1 && people[1][j] == -1)
+    private int clusterCalculation(Field field, ArrayList<Field> fields) {
+        int clusterSize = 1;
+
+        field.setChecked();
+        for (Field comparedField : fields) {
+            if (comparedField.isChecked()) {
                 continue;
-            if (people[0][j] == peopleFirst && people[1][j] == peopleSecond + 1)
-                cluster = cluster + clusterCalculation(people, j);
-            if (people[0][j] == peopleFirst + 1 && people[1][j] == peopleSecond)
-                cluster = cluster + clusterCalculation(people, j);
-            if (people[0][j] == peopleFirst && people[1][j] == peopleSecond - 1)
-                cluster = cluster + clusterCalculation(people, j);
-            if (people[0][j] == peopleFirst - 1 && people[1][j] == peopleSecond)
-                cluster = cluster + clusterCalculation(people, j);
+            }
+
+            if (isPartOfCluster(field, comparedField)) {
+                clusterSize = clusterSize + clusterCalculation(comparedField, fields);
+            }
         }
-        return cluster;
+
+        return clusterSize;
     }
 
-    public void printCluster() {
-        System.out.println("\nRisk groups report:\n----------\nNONE: " + none);//Вывод результата
-        System.out.println("MINOR: " + minor);
-        System.out.println("NORMAL: " + normal);
-        System.out.println("MAJOR: " + major);
-        System.out.println("CRITICAL: " + critical);
+    private boolean isPartOfCluster(Field field, Field comparedField) {
+        if (field.getRowM() == comparedField.getRowM() && (field.getColumnN() == comparedField.getColumnN() + 1 || field.getColumnN() == comparedField.getColumnN() - 1)) {
+            return true;
+        }
+
+        if ((field.getRowM() == comparedField.getRowM() + 1 || field.getRowM() == comparedField.getRowM() - 1) && field.getColumnN() == comparedField.getColumnN()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public String convertToStringCluster() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("\nRisk groups report:\n----------\nNONE: " + none + "\n");//Вывод результата
+        stringBuilder.append("MINOR: " + minor + "\n");
+        stringBuilder.append("NORMAL: " + normal + "\n");
+        stringBuilder.append("MAJOR: " + major + "\n");
+        stringBuilder.append("CRITICAL: " + critical + "\n");
+
+        return stringBuilder.toString();
     }
 }

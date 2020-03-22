@@ -6,23 +6,26 @@ import org.apache.commons.cli.*;
 
 public class CmdLine {
     public InputParameters parse(String[] args) throws ParseException, ParametersException {
+        final String ROWS = "m";
+        final String COLUMNS = "n";
+        final String FILL_FACTOR = "f";
 
         CommandLineParser cmdLinePosixParser = new DefaultParser();
         CommandLine commandLine = cmdLinePosixParser.parse(setOptions(), args);
 
-        if (!commandLine.hasOption("m")) {
+        if (!commandLine.hasOption(ROWS)) {
             throw new ParametersException("Не указано количество строк.");
         }
-        if (!commandLine.hasOption("n")) {
+        if (!commandLine.hasOption(COLUMNS)) {
             throw new ParametersException("Не указано количество столбцов.");
         }
-        if (!commandLine.hasOption("f")) {
+        if (!commandLine.hasOption(FILL_FACTOR)) {
             throw new ParametersException("Не указана вероятность заполнения сектора.");
         }
 
-        int rowCount = Integer.parseInt(commandLine.getOptionValue("m"));
-        int columnCount = Integer.parseInt(commandLine.getOptionValue("n"));
-        float fillFactor = Float.parseFloat(commandLine.getOptionValue("f"));
+        int rowCount = Integer.parseInt(commandLine.getOptionValue(ROWS));
+        int columnCount = Integer.parseInt(commandLine.getOptionValue(COLUMNS));
+        float fillFactor = Float.parseFloat(commandLine.getOptionValue(FILL_FACTOR));
 
         return new InputParameters(rowCount, columnCount, fillFactor);
     }
@@ -42,13 +45,5 @@ public class CmdLine {
         defaultOptions.addOption(optionFillFactor);
 
         return defaultOptions;
-    }
-
-    public String getHelp() {
-        return "Параметры указываются в формате:\n" +
-                "-m 'Количество строк матрицы' (целое число)\n" +
-                "-n 'Количество столбцов матрицы' (целое число)\n" +
-                "-f 'Вероятность заполнения клетки матрицы (от 0.0 до 1.0)'\n" +
-                "Пример: '-m 14 -n 9 -f 0.3'.\n";
     }
 }

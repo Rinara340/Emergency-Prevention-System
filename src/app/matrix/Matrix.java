@@ -1,61 +1,73 @@
 package app.matrix;
 
+import app.InputParameters;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class Matrix {
-    private boolean[][] field;
-    private int rowsM, columnsN, peopleCount = 0;
+    private ArrayList<Field> fields;
+    private int rowsM, columnsN;
 
-    public Matrix(int rowsM, int columnsN, float fillFactor) {
-        this.rowsM = rowsM;
-        this.columnsN = columnsN;
-        field = new boolean[this.rowsM][this.columnsN];
-        for (int i = 0; i < this.rowsM; i++){
-            for (int j = 0; j < this.columnsN; j++){
-                field [i][j] = Math.random() < fillFactor;
-            }
-        }
+    public Matrix(InputParameters inputParameters) {
+        fields = new ArrayList<>();
+        this.rowsM = inputParameters.getRowCountM();
+        this.columnsN = inputParameters.getColumnCountN();
+        fillMatrix(inputParameters.getFillFactor());
+    }
 
-        for (int i = 0; i < rowsM; i++) {
-            for (int j = 0; j < columnsN; j++) {
-                if (field[i][j]) {
-                    peopleCount++;
-                }
+    private void fillMatrix(float fillFactor) {
+        for (int row = 0; row < rowsM; row++) {
+            for (int column = 0; column < columnsN; column++) {
+                fields.add(new Field(row, column, Math.random() < fillFactor));
             }
         }
     }
 
-    public void printMatrix() {
-        for (int i = 0; i <= columnsN; i++){
-            System.out.print(" " + i);
+    public String convertToStringMatrix() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i <= columnsN; i++) {
+            stringBuilder.append(" " + i);
         }
-        System.out.println("");
+        stringBuilder.append("\n");
 
         final int SINGLE_DIGIT = 9;
-        for (int i = 0; i < rowsM; i++){
-            if(i < SINGLE_DIGIT) {
-                System.out.print(" " + (i + 1) + " ");
-            }
-            else {
-                System.out.print(i + 1 + " ");
+        for (Field field : fields) {
+            if (field.getColumnN() == 0) {
+                if (field.getRowM() < SINGLE_DIGIT) {
+                    stringBuilder.append(" ");
+                }
+
+                stringBuilder.append(field.getRowM() + 1 + " ");
             }
 
-            for (int j = 0; j < columnsN; j++){
-                if (field [i][j]) {
-                    System.out.print("X ");
-                }
-                else {
-                    System.out.print("- ");
-                }
+            if (field.isEngaged()) {
+                stringBuilder.append("X ");
+            } else {
+                stringBuilder.append("- ");
             }
-            System.out.println("");
+
+            if (field.getColumnN() == columnsN - 1) {
+                stringBuilder.append("\n");
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public void deleteFreeFields() {
+        Iterator<Field> fieldIterator = fields.iterator();
+        while (fieldIterator.hasNext()) {
+            Field field = fieldIterator.next();
+            if (!field.isEngaged()) {
+                fieldIterator.remove();
+            }
         }
     }
 
-    public int getPeopleCount() {
-        return peopleCount;
-    }
-
-    public boolean[][] getField() {
-        return field;
+    public ArrayList<Field> getFields() {
+        return fields;
     }
 }
 
