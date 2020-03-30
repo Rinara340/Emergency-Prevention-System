@@ -8,9 +8,7 @@ import app.reporter.Reporter;
 public class Main {
     public static void main(String[] args) {
         CmdLine cmdLine = new CmdLine();
-        InputParameters inputParameters = null;
-
-        inputParameters = cmdLine.parse(args);
+        InputParameters inputParameters = cmdLine.parse(args);
 
         Matrix matrix = new Matrix(inputParameters);
         String reporter = Reporter.printMatrix(matrix);
